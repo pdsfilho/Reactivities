@@ -4,11 +4,14 @@ import ReactDOM from 'react-dom';
 import './app/layout/styles.css';
 import App from './app/layout/App'; 
 import reportWebVitals from './reportWebVitals';
+import { store, StoreContext } from './app/stores/store';
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" />
-ReactDOM.render(
 
-    <App />,
-    
+ReactDOM.render(
+  <StoreContext.Provider value = {store}>
+    <App />
+  </StoreContext.Provider>,
+   
   document.getElementById('root')
 );
 
