@@ -1,22 +1,13 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect} from 'react';
 import { Container } from 'semantic-ui-react';
-import { Activity } from '../models/activity';
 import NavBar from './NavBar';
 import ActivityDashboard from '../../features/activities/dashboard/ActivityDashboard';
-import {v4 as uuid} from 'uuid';
-import agent from '../api/agent';
 import LoadingComponent from './LoadingComponent';
-import ActivityStore from '../stores/activityStore';
 import { useStore } from '../stores/store';
 import { observer } from 'mobx-react-lite';
 
 function App() {
   const {activityStore} = useStore();
-  
-  const [activities, setActivites] = useState<Activity[]>([]);
-  const [selectedActivity, setSelectedActivity] = useState<Activity | undefined>(undefined);
-  const [editMode, setEditMode] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     activityStore.loadActivities();
@@ -26,67 +17,18 @@ function App() {
   })*/
   }, [activityStore])
 
-  function handleSelectActivity(id: string){
-    setSelectedActivity(activities.find(x => x.id === id));
-  }
+  if (activityStore.loadingInitial) return <LoadingComponent content = 'Loading App'/>
 
-  function handleCancelSelectActivity(){
-    setSelectedActivity(undefined);
-  }
-
-  function handleFormOpen(id?: string){
-    id ? handleSelectActivity(id) : handleCancelSelectActivity();
-    setEditMode(true);
-  }
-
-  function handleFormClose(){
-    setEditMode(false);
-  }
-
-  function handleCreatOrEditActivity(activity: Activity){
-    setSubmitting(true);
-    if (activity.id){
-      agent.Activities.update(activity).then(() => {
-        setActivites([...activities.filter(x => x.id !== activity.id), activity])
-        setSelectedActivity(activity);
-        setEditMode(false);
-        setSubmitting(false);
-      })
-    } else{
-      activity.id = uuid();
-      agent.Activities.create(activity).then(() => {
-        setActivites([...activities, activity])
-        setSelectedActivity(activity);
-        setEditMode(false);
-        setSubmitting(false);
-      })
-    }
-  }
-
-    function handleDeleteActivity (id: string){
-      setSubmitting(true);
-      agent.Activities.delete(id).then(() => {})
-        setActivites([...activities.filter(x => x.id !== id)]);
-        setSubmitting(false);
-    }
-
-    if (activityStore.loadingInitial) return <LoadingComponent content = 'Loading App'/>
-
-    return (
-      <Fragment>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" />
-        
-        <NavBar/>
-        <Container style={{marginTop: '7em'}}>
-          <ActivityDashboard 
-            activities = {activityStore.activities} 
-            createOrEdit = {handleCreatOrEditActivity}
-            deleteActivity = {handleDeleteActivity}
-            submitting = {submitting}
-          />
-        </Container>  
-      </Fragment>
-    );
+  return (
+    <Fragment>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" />
+      
+      <NavBar/>
+      <Container style={{marginTop: '7em'}}>
+        <ActivityDashboard/>
+      </Container>  
+    </Fragment>
+  );
 }
 
 export default observer(App);
